@@ -5,9 +5,9 @@ static int32_t comparator(int a, int b);
 static void PrintArray(int arr[], int size);
 
 int main(int argc, char **argv) {
-  int arr[] = {1,1,1,};
-  QuickSortInt(arr, 3, &comparator);
-  PrintArray(arr, 3);
+  int arr[] = {1,3,2,1,2,2,3};
+  QuickSortInt(arr, 7, &comparator);
+  PrintArray(arr, 7);
 }
 
 static void PrintArray(int arr[], int size) {

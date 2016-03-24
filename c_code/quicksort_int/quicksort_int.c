@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016 Anirban Biswas
+ */
+
 #include "quicksort_int.h"
 
 static int *array_to_sort;
@@ -31,7 +35,7 @@ static void QuickSortIntHelper(uint32_t lo,
   }
   // Pivot point cannot be found here, manually sort and return
   if (hi - lo == 2) {
-    if (comparator(array_to_sort[lo], array_to_sort[hi - 1] > 0)) {
+    if (comparator(array_to_sort[lo], array_to_sort[hi - 1]) > 0) {
       Swap(lo, hi - 1);
     }
     return;
@@ -46,16 +50,18 @@ static void QuickSortIntHelper(uint32_t lo,
   while ((i < j) && comparator(array_to_sort[i], pivot_value) < 0) {
     i++;
   }
-  while ((i < j) && comparator(array_to_sort[j], pivot_value) >= 0) {
+  while ((i <= j) && comparator(array_to_sort[j], pivot_value) >= 0) {
     j--;
   }
   // Swap only if i < j. Update i, j
   while (i < j) {
     Swap(i, j);
-    while ((i <  j) && comparator(array_to_sort[i], pivot_value) < 0) {
+    i++;
+    j--;
+    while ((i < j) && comparator(array_to_sort[i], pivot_value) < 0) {
       i++;
     }
-    while ((i < j) && comparator(array_to_sort[i], pivot_value) >= 0) {
+    while ((i <= j) && comparator(array_to_sort[j], pivot_value) >= 0) {
       j--;
     }
   }

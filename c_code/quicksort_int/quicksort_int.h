@@ -1,8 +1,11 @@
+/*
+ * Copyright 2016 Anirban Biswas
+ */
+
 #ifndef _QUICKSORT_INT_H_
 #define _QUICKSORT_INT_H_
 
 #include <stdint.h>
-#include <stdio.h>
 
 /*
  * Takes an array, its size and a function to compare elements of the array
