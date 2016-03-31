@@ -31,6 +31,7 @@ void CountingSort(int arr[], uint32_t size) {
       bound_array[j]--;
     }
   }
+  free(bound_array);
 }
 
 static void FindMinMax(int arr[],

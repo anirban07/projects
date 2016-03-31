@@ -9,6 +9,10 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+/*
+ * Takes an array of integers and its size and sorts the array in place
+ * Note - This is not a stable sort
+ */
 void CountingSort(int arr[], uint32_t size);
 
 #endif  // _COUNTINGSORT_H_
