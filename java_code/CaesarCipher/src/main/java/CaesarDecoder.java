@@ -1,46 +1,105 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 
 /**
  * Created by Anirban on 9/7/2016.
+ * This class decodes a message encoded using the Caesar cipher.
  */
 public class CaesarDecoder {
-
+    // A set of words in the English language.
     private Set<String> dictionary;
-    private String[] letters;
+    // An array of English alphabets in decreasing order of their
+    // frequency of occurance in common English.
+    private char[] letters;
 
+    /**
+     * Constructs the Caesar cipher decoder.
+     * @throws IOException
+     */
     public CaesarDecoder() throws IOException {
-        BufferedReader dictionaryInput = new BufferedReader(new FileReader(CaesarDecoder.class.getClassLoader()
-                                                                .getResource("words2.txt").getPath()
-                                                                .replaceAll("%20", " ")));
-        BufferedReader lettersInput = new BufferedReader(new FileReader(CaesarDecoder.class.getClassLoader()
-                                                            .getResource("letters.txt").getPath()
-                                                            .replaceAll("%20", " ")));
-        dictionary = new HashSet<String>();
-        String dictionaryLine = null;
-        while ((dictionaryLine = dictionaryInput.readLine()) != null) {
-            dictionary.add(dictionaryLine);
-        }
-        letters = new String[26];
+        URL wordsUrl = Resources.getResource("words2.txt");
+        URL lettersUrl = Resources.getResource("letters.txt");
+
+        dictionary = new HashSet<String>(Resources.readLines(wordsUrl, Charsets.UTF_8));
+        List<String> lettersList = new ArrayList<String>(Resources.readLines(lettersUrl, Charsets.UTF_8));
+        letters = new char[26];
         for (int i = 0; i < 26; i++) {
-            letters[i] = lettersInput.readLine();
+            letters[i] = lettersList.get(i).charAt(0);
         }
     }
 
+    /**
+     * Decodes the encoded message passed in using the key provided.
+     * @param data The encoded message to decode.
+     * @param key The key to be used to decode the encoded message.
+     * @throws IllegalArgumentException If key passed in is negative.
+     * @return The decoded mesage obtained.
+     */
     public String decode(String data, int key) {
         if (key < 0) throw new IllegalArgumentException("Key passed in cannot be negative");
         key %= 26;
+        // Decoding a Caesar cipher encoded message is identical to encoding the
+        // same message by using the key, 26 - key used to encode it.
         return CaesarEncoder.encode(data, 26 - key);
     }
 
-    public String decode(String data) {
-        List<CharacterFrequency> frequency = getFrequency(data);
-        System.out.println("frequency = " + frequency);
-        return null;
+    /**
+     * Tries to decode the encoded message passed in.
+     * It uses frequency analysis to makes predictions for the key of
+     * the encoded message passed in.
+     * @param data The encoded mesage whose key is to be prediced.
+     * @return A List of Prediction objects sorted in decreasing order
+     * of confidence.
+     */
+    public List<Prediction> decode(String data) {
+        List<CharacterFrequency> frequencyList = getFrequency(data);
+        Map<String, Double> predictionConfidenceMap = new HashMap<String, Double>();
+        List<Prediction> predictionList = new ArrayList<Prediction>();
+        for (int i = 0; i < 5; i++) {
+            int key = (frequencyList.get(0).character - letters[i] + 26) % 26;
+            String prediction = decode(data, key);
+            double confidence = getConfidence(prediction);
+            predictionConfidenceMap.put(prediction, confidence);
+        }
+        for (String prediction : predictionConfidenceMap.keySet()) {
+            predictionList.add(new Prediction(prediction, predictionConfidenceMap.get(prediction)));
+        }
+        Collections.sort(predictionList, Collections.<Prediction>reverseOrder());
+        return predictionList;
     }
 
+    /**
+     * Returns the confidence in a decoded message.
+     * The higher the fraction of the number of english words to the total
+     * number of words, the higher the confidence.
+     * @param data The decoded message whose confidence is to be computed.
+     * @return The confidence in the decoded message passed.
+     */
+    private double getConfidence(String data) {
+        if (data.isEmpty()) {
+            return 100.0;
+        }
+        Scanner words = new Scanner(data.toLowerCase());
+        int total = 0;
+        int correct = 0;
+        while (words.hasNext()) {
+            total++;
+            String word = words.next().replaceAll("[^(a-z)]+$", "");
+            if (dictionary.contains(word)) correct++;
+        }
+        return (100.0 * correct) / total;
+    }
+
+    /**
+     * Computes the frequencies of the alphabetic characters in the given String
+     * and returns a List of CharacterFrequency objects.
+     * @param data The String whose character frequency is to be computed.
+     * @return A list of CharacterFrequency objects, sorted in decreasing order of
+     * character frequency.
+     */
     private List<CharacterFrequency> getFrequency(String data) {
         Map<Character, Integer> frequencyMap = new HashMap<Character, Integer>();
         String lowerCaseData = data.toLowerCase();
@@ -59,6 +118,58 @@ public class CaesarDecoder {
         }
         Collections.sort(frequencyList, Collections.<CharacterFrequency>reverseOrder());
         return frequencyList;
+    }
+
+    public class Prediction implements Comparable<Prediction> {
+        private String prediction;
+        private double confidence;
+
+        public Prediction(String p, double a) {
+            this.prediction = p;
+            this.confidence = a;
+        }
+
+        public String getPrediction() {
+            return prediction;
+        }
+
+        public void setPrediction(String prediction) {
+            this.prediction = prediction;
+        }
+
+        public double getConfidence() {
+            return confidence;
+        }
+
+        public void setConfidence(double confidence) {
+            this.confidence = confidence;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Prediction that = (Prediction) o;
+
+            if (prediction != that.prediction) return false;
+            if (Double.compare(that.confidence, confidence) != 0) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return  prediction.hashCode() ^ ((Double) confidence).hashCode();
+        }
+
+        public int compareTo(Prediction o) {
+            return Double.compare(this.confidence, o.confidence);
+        }
+
+        public String toString() {
+            return "(" + prediction + ", " + confidence + ")";
+        }
     }
 
     private class CharacterFrequency implements Comparable<CharacterFrequency> {
