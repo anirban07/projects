@@ -15,7 +15,7 @@ public class Application {
         String filename = "message.txt";
         URL url = Resources.getResource(filename);
         String file = Resources.toString(url, Charsets.UTF_8);
-        int key = 25;
+        int key = 2;
         String encoded = CaesarEncoder.encode(file, key);
         System.out.println("Encoded:");
         System.out.println(encoded);
@@ -25,6 +25,6 @@ public class Application {
         System.out.println(decoded.get(0).getPrediction());
         System.out.println();
         DecimalFormat df = new DecimalFormat("#.##");
-        System.out.println("Confidence: " + df.format(decoded.get(0).getAccuracy()) + "%");
+        System.out.println("Confidence: " + df.format(decoded.get(0).getConfidence()) + "%");
     }
 }
