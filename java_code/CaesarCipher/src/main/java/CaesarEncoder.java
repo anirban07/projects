@@ -6,11 +6,6 @@
  * For example, the String "abc" would be encoded as def if the key was 3.
  */
 public class CaesarEncoder {
-
-    public static void main(String[] args) {
-        System.out.println(encode("A", 5));
-    }
-
     /**
      * This method encodes the String passed using a Caesar cipher with the key passed.
      * @param data The String to be encoded
@@ -37,10 +32,10 @@ public class CaesarEncoder {
      * @return The rotated character.
      */
     private static char rotate(char c, int key) {
-        if ((c >= 65 && c <= 90)) {  // Upper case alphabet
-            c = (char) ((c - 65 + key) % 26 + 65);
-        } else if (c >= 97 && c <= 122) {  // Lower case alphabet
-            c = (char) ((c - 97 + key) % 26 + 97);
+        if (c >= 'A' && c <= 'Z') {  // Upper case alphabet
+            c = (char) ((c - 'A' + key) % 26 + 'A');
+        } else if (c >= 'a' && c <= 'z') {  // Lower case alphabet
+            c = (char) ((c - 'a' + key) % 26 + 'a');
         }
         return c;
     }
