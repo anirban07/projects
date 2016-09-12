@@ -6,14 +6,14 @@ import static org.junit.Assert.*;
  * Created by Anirban on 9/7/2016.
  */
 public class CaesarEncoderTest {
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullDataInput() {
-        CaesarEncoder.encode(null, 1);
+        assertNull(CaesarEncoder.encode(null, 1));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNegativeKeyInput() {
-        CaesarEncoder.encode("test", -1);
+        assertEquals("zab", CaesarEncoder.encode("abc", -1));
     }
 
     @Test
@@ -59,6 +59,16 @@ public class CaesarEncoderTest {
     @Test
     public void testLargeKey() {
         assertEquals("rst uvw", CaesarEncoder.encode("uvw xyz", Integer.MAX_VALUE));
+    }
+
+    @Test
+    public void testNegativeKeyWrap() {
+        assertEquals("pqr stu", CaesarEncoder.encode("uvw xyz", -31));
+    }
+
+    @Test
+    public void testLargeNegativeKey() {
+        assertEquals("wxy zab", CaesarEncoder.encode("uvw xyz", Integer.MIN_VALUE));
     }
 
     @Test

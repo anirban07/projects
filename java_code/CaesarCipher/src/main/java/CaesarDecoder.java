@@ -35,12 +35,12 @@ public class CaesarDecoder {
      * Decodes the encoded message passed in using the key provided.
      * @param data The encoded message to decode.
      * @param key The key to be used to decode the encoded message.
-     * @throws IllegalArgumentException If key passed in is negative.
+     * @throws IllegalArgumentException If key passed in is negative or
+     * data passed is null.
      * @return The decoded mesage obtained.
      */
     public String decode(String data, int key) {
-        if (key < 0) throw new IllegalArgumentException("Key passed in cannot be negative");
-        key %= 26;
+        key %= 26; // -25 <= key <= 25
         // Decoding a Caesar cipher encoded message is identical to encoding the
         // same message by using the key, 26 - key used to encode it.
         return CaesarEncoder.encode(data, 26 - key);
@@ -52,13 +52,19 @@ public class CaesarDecoder {
      * the encoded message passed in.
      * @param data The encoded mesage whose key is to be prediced.
      * @return A List of Prediction objects sorted in decreasing order
-     * of confidence.
+     * of confidence. null if data passed is null.
      */
     public List<Prediction> decode(String data) {
+        if (data == null) return null;
+        if (data.isEmpty()) {
+            List<Prediction> emptyList = new ArrayList<Prediction>();
+            emptyList.add(new Prediction("", 100.0));
+            return emptyList;
+        }
         List<CharacterFrequency> frequencyList = getFrequency(data);
         Map<String, Double> predictionConfidenceMap = new HashMap<String, Double>();
         List<Prediction> predictionList = new ArrayList<Prediction>();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             int key = (frequencyList.get(0).character - letters[i] + 26) % 26;
             String prediction = decode(data, key);
             double confidence = getConfidence(prediction);
@@ -76,9 +82,11 @@ public class CaesarDecoder {
      * The higher the fraction of the number of english words to the total
      * number of words, the higher the confidence.
      * @param data The decoded message whose confidence is to be computed.
+     * @pre data != null
      * @return The confidence in the decoded message passed.
      */
     private double getConfidence(String data) {
+        assert data != null;
         if (data.isEmpty()) {
             return 100.0;
         }
@@ -97,10 +105,12 @@ public class CaesarDecoder {
      * Computes the frequencies of the alphabetic characters in the given String
      * and returns a List of CharacterFrequency objects.
      * @param data The String whose character frequency is to be computed.
+     * @pre data != null
      * @return A list of CharacterFrequency objects, sorted in decreasing order of
      * character frequency.
      */
     private List<CharacterFrequency> getFrequency(String data) {
+        assert data != null;
         Map<Character, Integer> frequencyMap = new HashMap<Character, Integer>();
         String lowerCaseData = data.toLowerCase();
         for (int i = 0; i < lowerCaseData.length(); i++) {
@@ -120,7 +130,7 @@ public class CaesarDecoder {
         return frequencyList;
     }
 
-    public class Prediction implements Comparable<Prediction> {
+    public static class Prediction implements Comparable<Prediction> {
         private String prediction;
         private double confidence;
 
